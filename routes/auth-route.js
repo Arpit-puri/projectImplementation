@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const authService = require('../services/auth-service');
 const oauthConfig = require('../config/oauth');
-const authService = require('../services/authService');
 
 // Initiate Google OAuth
 router.get('/google', (req, res) => {

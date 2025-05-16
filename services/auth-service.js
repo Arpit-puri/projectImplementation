@@ -55,9 +55,6 @@ class AuthService {
 
     return { token, user, tenants: tenantUsers };
   }
-}
-
-class AuthService {
   // User registration
   async register(email, password) {
     const existingUser = await masterDB.model('User').findOne({ email });
@@ -113,5 +110,4 @@ class AuthService {
   }
 }
 
-module.exports = new AuthService();
 module.exports = new AuthService();
