@@ -21,8 +21,8 @@ exports.googleCallback = async (req, res, next) => {
 
 exports.register = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
-    const token = await authService.register(email, password);
+    const { email, password, globalRoles, tenantRoles } = req.body;
+    const token = await authService.register(email, password, globalRoles, tenantRoles);
     res.json({ token });
   } catch (err) {
     next(err);
@@ -31,8 +31,8 @@ exports.register = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
   try {
-    const { email, password, globalRoles, tenantRoles } = req.body;
-    const token = await authService.login(email, password, globalRoles, tenantRoles);
+    const { email, password } = req.body;
+    const token = await authService.login(email, password);
     res.json({ token });
   } catch (err) {
     next(err);
