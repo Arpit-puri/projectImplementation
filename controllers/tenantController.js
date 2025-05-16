@@ -10,30 +10,40 @@ const TenantUser = masterDB.model('TenantUser');
 exports.createTenant = async (req, res, next) => {
   try {
     // Validate admin privileges
-    if (!req.user.globalRoles.includes('admin')) {
+    if (!req.user.globalRoles.includes('admin') && !req.user.globalRoles.includes('superadmin')) {
       return res.status(403).json({ 
         success: false,
         message: 'Unauthorized: Admin privileges required' 
       });
     }
-
     const { tenantId, name, adminEmail } = req.body;
-    
-    // Validate input
-    if (!tenantId || !name) {
+    if (exists) {
+      throw new Error(`Tenant with ID ${tenantId} already exists`);
+    }
+    // Validate required fields
+    if (!tenantId) {
       return res.status(400).json({
         success: false,
-        message: 'Tenant ID and name are required'
+        message: 'Factory ID is required'
       });
     }
-
+    
+    if (!name) {
+      return res.status(400).json({
+        success: false,
+        message: 'Factory name is required'
+      });
+    }
+    
+    // Create tenant
     const tenant = await tenantService.createTenant({ 
       tenantId, 
       name,
       adminEmail,
-      createdBy: req.user.id 
+      createdBy: req.user ? req.user.id : null
     });
     
+    // Return success response
     res.status(201).json({
       success: true,
       data: {
@@ -44,6 +54,24 @@ exports.createTenant = async (req, res, next) => {
       }
     });
   } catch (err) {
+    console.error('Error creating tenant:', err);
+    
+    // Handle specific error types
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation error',
+        errors: Object.values(err.errors).map(e => e.message)
+      });
+    }
+    
+    if (err.code === 11000) { // Duplicate key error
+      return res.status(409).json({
+        success: false,
+        message: 'A factory with this ID already exists'
+      });
+    }
+    
     next(err);
   }
 };

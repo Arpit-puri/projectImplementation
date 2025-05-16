@@ -6,7 +6,6 @@ const morgan = require('morgan');
 const { masterDB } = require('./config/database');
 require('./models/user');
 require('./models/tenant');
-require('./models/tenantuser');
 const authRoutes = require('./routes/auth-route');
 const apiRoutes = require('./routes/api-routes');
 const adminRoutes = require('./routes/admin-routes');

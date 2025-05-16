@@ -10,7 +10,7 @@ const User = masterDB.model('User');
 exports.makeAdmin = async (req, res, next) => {
   try {
     // Verify superadmin privileges
-    if (!req?.user?.globalRoles?.includes('superadmin') || !req?.user?.globalRoles) {
+    if (!req?.user?.globalRoles || !req?.user?.globalRoles?.includes('superadmin')) {
       return res.status(403).json({
         success: false,
         message: 'Unauthorized: Superadmin privileges required'
