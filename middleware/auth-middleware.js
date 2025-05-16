@@ -1,34 +1,54 @@
 const jwt = require('jsonwebtoken');
-const authService = require('../services/authService');
+const authService = require('../services/auth-service');
 
 const authMiddleware = async (req, res, next) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) {
-      return res.status(401).json({ error: 'No token provided' });
+    // Extract token from Authorization header
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ 
+        error: 'No authorization header provided',
+        code: 'AUTH_HEADER_MISSING'
+      });
     }
 
-    req.user = await authService.verifyToken(token);
-    next();
-  } catch (err) {
-    res.status(401).json({ error: 'Invalid token' });
-  }
-};
+    const token = authHeader.startsWith('Bearer ') 
+      ? authHeader.slice(7) 
+      : authHeader;
 
-function authenticate(req, res, next) {
-  const token = req.header('Authorization')?.replace('Bearer ', '');
-  
-  if (!token) {
-    return res.status(401).send('Access denied. No token provided.');
-  }
+    if (!token) {
+      return res.status(401).json({ 
+        error: 'No token provided',
+        code: 'TOKEN_MISSING'
+      });
+    }
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Verify token and attach user to request
+    const decoded = await authService.verifyToken(token);
     req.user = decoded;
     next();
   } catch (err) {
-    res.status(400).send('Invalid token.');
-  }
-}
+    // Handle specific JWT errors
+    if (err instanceof jwt.TokenExpiredError) {
+      return res.status(401).json({ 
+        error: 'Token has expired',
+        code: 'TOKEN_EXPIRED'
+      });
+    }
+    if (err instanceof jwt.JsonWebTokenError) {
+      return res.status(401).json({ 
+        error: 'Invalid token',
+        code: 'TOKEN_INVALID'
+      });
+    }
 
-module.exports = {authenticate, authMiddleware};
+    // Log unexpected errors
+    console.error('Auth middleware error:', err);
+    res.status(500).json({ 
+      error: 'Internal server error during authentication',
+      code: 'AUTH_ERROR'
+    });
+  }
+};
+
+module.exports = authMiddleware;

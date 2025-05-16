@@ -1,18 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const { getTenantConnection } = require('../config/database');
 const authMiddleware = require('../middleware/auth-middleware');
 const tenantMiddleware = require('../middleware/tenant-middleware');
+const {
+  getTenantData,
+  createTenantData,
+  getAnalytics
+} = require('../controllers/apiController');
 
-// Example tenant-specific route
-router.get('/data', 
-  authMiddleware,
-  tenantMiddleware,
-  async (req, res) => {
-    const tenantDb = await getTenantConnection(req.tenantId);
-    const data = await tenantDb.model('SomeModel').find();
-    res.json(data);
-  }
-);
+router.use(authMiddleware);
+router.use(tenantMiddleware);
+
+router.get('/data', getTenantData);
+router.post('/data', createTenantData);
+router.get('/analytics', getAnalytics);
 
 module.exports = router;

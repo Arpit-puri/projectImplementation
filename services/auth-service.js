@@ -56,20 +56,22 @@ class AuthService {
     return { token, user, tenants: tenantUsers };
   }
   // User registration
-  async register(email, password) {
+  async register(email, password, globalRoles, tenantRoles) {
     const existingUser = await masterDB.model('User').findOne({ email });
     if (existingUser) {
       throw new Error('User already exists');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new masterDB.model('User')({
+    const usercreated = await masterDB.model('User').create({
       email,
-      password: hashedPassword
+      password: hashedPassword,
+      globalRoles,
+      tenantRoles
     });
 
-    await user.save();
-    return this.generateToken(user);
+    await usercreated.save();
+    return this.generateToken(usercreated);
   }
 
   // User login
@@ -92,7 +94,8 @@ class AuthService {
     const payload = {
       id: user._id,
       email: user.email,
-      roles: user.roles || []
+      roles: user.roles || [],
+      globalRoles: user.globalRoles || []
     };
 
     return jwt.sign(payload, process.env.JWT_SECRET, {
