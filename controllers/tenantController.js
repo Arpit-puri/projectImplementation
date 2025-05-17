@@ -35,7 +35,6 @@ exports.createTenant = async (req, res, next) => {
       });
     }
     
-    // Create tenant
     const tenant = await tenantService.createTenant({ 
       tenantId, 
       name,
@@ -43,7 +42,6 @@ exports.createTenant = async (req, res, next) => {
       createdBy: req.user ? req.user.id : null
     });
     
-    // Return success response
     res.status(201).json({
       success: true,
       data: {
@@ -56,7 +54,6 @@ exports.createTenant = async (req, res, next) => {
   } catch (err) {
     console.error('Error creating tenant:', err);
     
-    // Handle specific error types
     if (err.name === 'ValidationError') {
       return res.status(400).json({
         success: false,
@@ -65,7 +62,7 @@ exports.createTenant = async (req, res, next) => {
       });
     }
     
-    if (err.code === 11000) { // Duplicate key error
+    if (err.code === 11000) {
       return res.status(409).json({
         success: false,
         message: 'A factory with this ID already exists'

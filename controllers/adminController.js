@@ -32,7 +32,7 @@ exports.makeAdmin = async (req, res, next) => {
         message: 'User not found'
       });
     }
-
+    //TODO - Add audit log for this action
     // Log admin action
     // await AuditLog.create({
     //   action: 'role_assignment',

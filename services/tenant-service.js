@@ -43,14 +43,11 @@ class TenantService {
     
     await newTenant.save();
     
-    // If admin email is provided, assign the admin role to that user
     if (adminEmail && createdBy) {
       try {
-        // Find user by email
         const User = masterDB.model('User');
         const adminUser = await User.findOne({ email: adminEmail });
         if (adminUser) {
-          // Create tenant user association
           await TenantUser.create({
             userId: adminUser._id,
             tenantId: newTenant._id,
@@ -65,10 +62,8 @@ class TenantService {
       }
     }
     
-    // Initialize the tenant database
     await this.initializeTenantDatabase(connectionString);
     
-    // Activate the tenant after successful initialization
     newTenant.status = 'active';
     await newTenant.save();
     
@@ -81,10 +76,8 @@ class TenantService {
    */
   async initializeTenantDatabase(connectionString) {
     try {
-      // Create a connection to the new tenant database
       const conn = await mongoose.createConnection(connectionString);
-      
-      // Define and initialize tenant-specific schemas and models
+      //TODO - Make a different schema which will create default collections for the tenant an import it here
       Product.register(conn);
 
       const ProductSchema = new mongoose.Schema({
@@ -94,12 +87,8 @@ class TenantService {
         createdAt: { type: Date, default: Date.now }
       });
       
-      // Initialize the models
       conn.model('Product', ProductSchema);
-      
-      // You can create additional models as needed
-      
-      // Close the connection after initialization
+ 
       await conn.close();
       
       console.log(`Tenant database initialized: ${connectionString.split('/').pop()}`);

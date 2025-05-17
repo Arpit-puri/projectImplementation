@@ -40,7 +40,6 @@ class ConnectionPool {
       lastUsed: Date.now()
     });
 
-    // Start cleanup interval if not already running
     if (!this.cleanupInterval) {
       this.startCleanupInterval();
     }
@@ -69,5 +68,4 @@ class ConnectionPool {
   }
 }
 
-// Singleton instance
 module.exports = new ConnectionPool();

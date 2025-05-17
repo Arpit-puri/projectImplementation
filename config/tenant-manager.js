@@ -4,19 +4,14 @@ const { encrypt } = require('../utils/crypto');
 
 class TenantManager {
   async createTenantDatabase(tenantId) {
-    // Generate unique database name
     const dbName = `tenant_${tenantId.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
     
-    // Create connection string (in production, use environment-specific config)
     const connectionString = `mongodb://localhost:27017/${dbName}?authSource=admin`;
     
-    // Create the actual tenant database
     const tenantConnection = await mongoose.createConnection(connectionString);
     
-    // Initialize collections (example)
     this.initializeTenantCollections(tenantConnection);
     
-    // Store tenant config in master DB
     const Tenant = masterDB.model('Tenant');
     const tenant = new Tenant({
       tenantId,
@@ -34,6 +29,7 @@ class TenantManager {
 
   initializeTenantCollections(connection) {
     // Define your tenant-specific schemas here
+    //TODO make different file for such cases
     const ExampleSchema = new mongoose.Schema({
       name: String,
       value: Number,
@@ -42,13 +38,13 @@ class TenantManager {
     
     connection.model('Example', ExampleSchema);
     
-    // Add more collections as needed
+    // Add more collections as needed or make different file for such cases and import here
     // connection.model('Product', ProductSchema);
     // connection.model('Order', OrderSchema);
   }
 
   async deleteTenantDatabase(tenantId) {
-    // Implementation would:
+    // TODO - Implementation would:
     // 1. Backup data (if needed)
     // 2. Drop database
     // 3. Update master DB record
